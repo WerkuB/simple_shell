@@ -82,7 +82,7 @@ char *get_env_value(char *beginning, int len)
 	if (var_addr)
 	{
 		temp = *var_addr;
-		/* count the part of the string returned up to the character right before the '=' sign */
+	/* count the part of the str returned up to the char right before the '=' */
 		while (*temp != '=')
 			temp++;
 		temp++;
