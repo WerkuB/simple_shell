@@ -1,23 +1,29 @@
-#include "main.h"
+#include "shell.h"
+
 void sig_handler(int sig);
 int execute(char **args, char **front);
+
 /**
  * sig_handler - Prints a new prompt upon a signal.
  * @sig: The signal.
  */
 void sig_handler(int sig)
 {
+	char *new_prompt = "\n$ ";
+
 	(void)sig;
-	write(STDIN_FILENO, "\n$ ", 3);
+	signal(SIGINT, sig_handler);
+	write(STDIN_FILENO, new_prompt, 3);
 }
+
 /**
-* execute - Executes a command in a child process.
-* @args: An array of arguments.
-* @front: A double pointer to the beginning of args.
-*
-* Return: If an error occurs - a corresponding error code.
-*         O/w - The exit value of the last executed command.
-*/
+ * execute - Executes a command in a child process.
+ * @args: An array of arguments.
+ * @front: A double pointer to the beginning of args.
+ *
+ * Return: If an error occurs - a corresponding error code.
+ *         O/w - The exit value of the last executed command.
+ */
 int execute(char **args, char **front)
 {
 	pid_t child_pid;
@@ -26,9 +32,10 @@ int execute(char **args, char **front)
 
 	if (command[0] != '/' && command[0] != '.')
 	{
-		flag = 1;  /* indic that the cois neither a dir nor ale */
+		flag = 1;
 		command = get_location(command);
 	}
+
 	if (!command || (access(command, F_OK) == -1))
 	{
 		if (errno == EACCES)
@@ -66,63 +73,62 @@ int execute(char **args, char **front)
 		free(command);
 	return (ret);
 }
-/**
- * main - A simple shell (Unix command interpreter)
- * @argc: The number of arguments supplied
- * @argv: An array of arguments supplied
- * Return: The return value of the last executed command
- * Description
- * Establish the name of the program
- * set history to 1
- * set aliases to NULL
- * Listen for sig and set a sign handler func to handle each sign
- * set return value to 0
- * create a copy of the environmental variables
- * Check if program was started with command line arg and process those argu
- * check if a terminal is being used
- * start the infinite loop (for Prompt, Read, Parse, Execute)
- */
-int main(int argc, char **argv)
-{
-	int return_code = 0, return_value;
-	int *execute_return = &return_value;
 
-	shell = argv[0];
-	history_count = 1;
+/**
+ * main - Runs a simple UNIX command interpreter.
+ * @argc: The number of arguments supplied to the program.
+ * @argv: An array of pointers to the arguments.
+ *
+ * Return: The return value of the last executed command.
+ */
+int main(int argc, char *argv[])
+{
+	int ret = 0, retn;
+	int *exe_ret = &retn;
+	char *prompt = "$ ", *new_line = "\n";
+
+	name = argv[0];
+	hist = 1;
 	aliases = NULL;
 	signal(SIGINT, sig_handler);
-	return_value = 0;
+
+	*exe_ret = 0;
 	environ = _copyenv();
 	if (!environ)
 		exit(-100);
+
 	if (argc != 1)
 	{
-		return_code = proc_file_commands(argv[1], execute_return);
+		ret = proc_file_commands(argv[1], exe_ret);
 		free_env();
 		free_alias_list(aliases);
-		return (*execute_return);
+		return (*exe_ret);
 	}
-	if (!isatty(STDERR_FILENO))
+
+	if (!isatty(STDIN_FILENO))
 	{
-		while (return_code != END_OF_FILE && return_code != EXIT)
-			return_code = handle_args(execute_return);
+		while (ret != END_OF_FILE && ret != EXIT)
+			ret = handle_args(exe_ret);
 		free_env();
 		free_alias_list(aliases);
-		return (*execute_return);
+		return (*exe_ret);
 	}
+
 	while (1)
 	{
-		write(STDOUT_FILENO, "$ ", 2);
-		return_code = handle_args(execute_return);
-		if (return_code == END_OF_FILE || return_code == EXIT)
+		write(STDOUT_FILENO, prompt, 2);
+		ret = handle_args(exe_ret);
+		if (ret == END_OF_FILE || ret == EXIT)
 		{
-			write(STDERR_FILENO, "\n", 1);
+			if (ret == END_OF_FILE)
+				write(STDOUT_FILENO, new_line, 1);
 			free_env();
 			free_alias_list(aliases);
-			exit(*execute_return);
+			exit(*exe_ret);
 		}
 	}
+
 	free_env();
 	free_alias_list(aliases);
-	return (*execute_return);
+	return (*exe_ret);
 }

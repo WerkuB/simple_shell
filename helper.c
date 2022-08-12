@@ -1,4 +1,4 @@
-#include "main.h"
+#include "shell.h"
 
 void free_args(char **args, char **front);
 char *get_pid(void);
@@ -82,7 +82,6 @@ char *get_env_value(char *beginning, int len)
 	if (var_addr)
 	{
 		temp = *var_addr;
-	/* count the part of the str returned up to the char right before the '=' */
 		while (*temp != '=')
 			temp++;
 		temp++;
@@ -136,7 +135,7 @@ void variable_replacement(char **line, int *exe_ret)
 			}
 			new_line = malloc(j + _strlen(replacement)
 					  + _strlen(&old_line[k]) + 1);
-			if (!new_line)
+			if (!line)
 				return;
 			new_line[0] = '\0';
 			_strncat(new_line, old_line, j);

@@ -1,25 +1,25 @@
-#ifndef _MAIN_H_
-#define _MAIN_H_
+#ifndef _SHELL_H_
+#define _SHELL_H_
 
-#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <stdio.h>
 
 #define END_OF_FILE -2
 #define EXIT -3
 
-/* global variables for the program */
-char *shell; /* for program name */
-int history_count; /* keep count of items in history */
-
 /* Global environemnt */
 extern char **environ;
+/* Global program name */
+char *name;
+/* Global history counter */
+int hist;
 
 /**
  * struct list_s - A new struct type defining a linked list.
@@ -59,7 +59,6 @@ typedef struct alias_s
 /* Global aliases linked list */
 alias_t *aliases;
 
-
 /* Main Helpers */
 ssize_t _getline(char **lineptr, size_t *n, FILE *stream);
 void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
@@ -93,13 +92,13 @@ int _strncmp(const char *s1, const char *s2, size_t n);
 
 /* Builtins */
 int (*get_builtin(char *command))(char **args, char **front);
-int hsh_exit(char **args, char **front);
-int hsh_env(char **args, char __attribute__((__unused__)) **front);
-int hsh_setenv(char **args, char __attribute__((__unused__)) **front);
-int hsh_unsetenv(char **args, char __attribute__((__unused__)) **front);
-int hsh_cd(char **args, char __attribute__((__unused__)) **front);
-int hsh_alias(char **args, char __attribute__((__unused__)) **front);
-int hsh_help(char **args, char __attribute__((__unused__)) **front);
+int shellby_exit(char **args, char **front);
+int shellby_env(char **args, char __attribute__((__unused__)) **front);
+int shellby_setenv(char **args, char __attribute__((__unused__)) **front);
+int shellby_unsetenv(char **args, char __attribute__((__unused__)) **front);
+int shellby_cd(char **args, char __attribute__((__unused__)) **front);
+int shellby_alias(char **args, char __attribute__((__unused__)) **front);
+int shellby_help(char **args, char __attribute__((__unused__)) **front);
 
 /* Builtin Helpers */
 char **_copyenv(void);

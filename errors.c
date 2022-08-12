@@ -1,4 +1,4 @@
-#include "main.h"
+#include "shell.h"
 
 int num_len(int num);
 char *_itoa(int num);
@@ -106,11 +106,10 @@ int create_error(char **args, int err)
 		error = error_127(args);
 		break;
 	}
-
-	/* print out error message to the stderr */
 	write(STDERR_FILENO, error, _strlen(error));
 
 	if (error)
 		free(error);
 	return (err);
+
 }
